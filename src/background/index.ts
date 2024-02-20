@@ -29,7 +29,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         const value = await bucket.get();
         const userTargetLang = value.targetLang ?? 'JA';
         const translatedText = await translate(selectedText, userTargetLang);
-        console.log(translatedText);
+
+        chrome.tabs.sendMessage(tab.id as number, {
+          type: 'SHOW',
+          data: {
+            lang: userTargetLang,
+            translatedText: translatedText,
+            originalText: selectedText,
+          },
+        });
+
         break;
       }
     }

@@ -3,17 +3,25 @@ import { createRoot } from 'react-dom/client';
 import Content from './Content';
 import { MantineProvider } from '@mantine/core';
 
-const container = document.createElement('my-extension-root');
-document.body.after(container);
+chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
+  if (message.type === 'SHOW') {
+    if (document.getElementsByTagName('my-extension-root').length > 0) {
+      document.getElementsByTagName('my-extension-root')[0].remove();
+    }
 
-createRoot(container).render(
-  <React.StrictMode>
-    <MantineProvider>
-      <Content
-        translatedText={'ここに翻訳したテキストが入る'}
-        originalText={'ここに翻訳前のテキストが入る'}
-        targetLang={'JA'}
-      />
-    </MantineProvider>
-  </React.StrictMode>
-);
+    const container = document.createElement('my-extension-root');
+    document.body.after(container);
+
+    createRoot(container).render(
+      <React.StrictMode>
+        <MantineProvider>
+          <Content
+            translatedText={message.data.translatedText.toString()}
+            originalText={message.data.originalText.toString()}
+            targetLang={message.data.lang.toString()}
+          />
+        </MantineProvider>
+      </React.StrictMode>
+    );
+  }
+});
