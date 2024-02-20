@@ -1,6 +1,6 @@
 import { DialogBox, DialogBoxProps } from './DialogBox';
 
-const Content = (props: DialogBoxProps) => {
+const Content = (props: DialogBoxProps & { orect: DOMRect }) => {
   return (
     <div
       style={{
@@ -14,8 +14,8 @@ const Content = (props: DialogBoxProps) => {
       <div
         style={{
           position: 'absolute',
-          left: '10px', // 自由に変えて良い
-          top: '10px', // 自由に変えて良い
+          left: window.scrollX + props.orect.left,
+          top: window.scrollY + props.orect.bottom + 10,
           zIndex: 2147483550,
         }}
       >
