@@ -46,8 +46,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
-  if (message.type === 'TRANSALTE') {
-    const selectedText = message.data.selectedText ?? '';
+  if (message.type === 'TRANSLATE') {
+    const selectedText = message.data.selectionText ?? '';
     const value = await bucket.get();
     const userTargetLang = value.targetLang ?? 'JA';
     const translatedText = await translate(selectedText, userTargetLang);
