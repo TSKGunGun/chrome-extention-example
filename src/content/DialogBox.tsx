@@ -14,6 +14,8 @@ import {
 import { useClickOutside } from '@mantine/hooks';
 import { useState } from 'react';
 import { MdDone, MdOutlineContentCopy, MdVolumeUp } from 'react-icons/md';
+import { translate } from '../app/translate';
+import { getBucket } from '@extend-chrome/storage';
 
 export interface DialogBoxProps {
   translatedText: string;
@@ -21,13 +23,28 @@ export interface DialogBoxProps {
   targetLang: string;
 }
 
+interface MyBucket {
+  targetLang: string;
+}
+const bucket = getBucket<MyBucket>('my_bucket', 'sync');
+
 export const DialogBox = (props: DialogBoxProps) => {
   const [opened, setOpened] = useState(true);
   const [diaglog, setDialog] = useState<HTMLDivElement | null>(null);
+  const [text, setText] = useState(props.translatedText);
+  const [lang, setLang] = useState(props.targetLang);
+
   // 1.
   useClickOutside(() => setOpened(false), null, [diaglog]);
   // 2.
   const IconUrl = chrome.runtime.getURL('images/extension_128.png');
+
+  const handleChange = async (value: string) => {
+    bucket.set({ targetLang: value });
+    const newText = await translate(props.originalText, value);
+    setText(newText);
+    setLang(value);
+  };
 
   return opened ? (
     <Box
@@ -49,7 +66,8 @@ export const DialogBox = (props: DialogBoxProps) => {
           訳文：
         </Text>
         <Select
-          value={props.targetLang}
+          value={lang}
+          onChange={(value: string) => handleChange(value)}
           size="xs"
           data={[
             { value: 'EN', label: '英語' },
@@ -62,7 +80,7 @@ export const DialogBox = (props: DialogBoxProps) => {
       <Divider />
       <Stack pt="sm" spacing="xs" style={{ textAlign: 'left' }}>
         <Text size="sm" c="dark">
-          {props.translatedText}
+          {text}
         </Text>
         <Group position="right" spacing="xs">
           {/* 3. */}
@@ -72,7 +90,7 @@ export const DialogBox = (props: DialogBoxProps) => {
             </ActionIcon>
           </Tooltip>
           {/* 4. */}
-          <CopyButton value={props.translatedText}>
+          <CopyButton value={text}>
             {({ copied, copy }) => (
               <Tooltip label={copied ? '訳文をコピーしました' : 'クリップボードにコピー'} withArrow>
                 <ActionIcon onClick={copy}>
